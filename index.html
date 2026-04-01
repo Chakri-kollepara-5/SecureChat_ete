@@ -856,14 +856,7 @@ footer strong{color:var(--text2);}
         <strong style="color:var(--text)">OAEP</strong> (Optimal Asymmetric Encryption Padding) adds randomized padding before encryption, preventing chosen-ciphertext attacks and making RSA semantically secure.<br><br>
         In SecureChat: RSA is used for <em>key encapsulation</em> — encrypting the AES session key, not the message itself (too slow for large data).
       </div>
-      <div class="ec-code">
-<span class="kw">const</span> keyPair = <span class="kw">await</span> crypto.subtle.<span class="fn">generateKey</span>({
-  name: <span class="str">'RSA-OAEP'</span>,
-  modulusLength: <span class="str">2048</span>,       <span class="cm">// key size</span>
-  publicExponent: <span class="str">new Uint8Array([1,0,1])</span>, <span class="cm">// e=65537</span>
-  hash: <span class="str">'SHA-256'</span>
-}, <span class="kw">true</span>, [<span class="str">'encrypt'</span>, <span class="cm">'decrypt'</span>]);
-      </div>
+
     </div>
 
     <!-- AES -->
@@ -880,14 +873,7 @@ footer strong{color:var(--text2);}
         A fresh random 96-bit <strong style="color:var(--text)">IV (Initialization Vector)</strong> is generated for every single message. This ensures that even if you send the same message twice, the ciphertext is completely different — preventing pattern analysis.<br><br>
         In SecureChat: AES-GCM encrypts the actual message. It's ~1000× faster than RSA for large data.
       </div>
-      <div class="ec-code">
-<span class="kw">const</span> iv = crypto.<span class="fn">getRandomValues</span>(<span class="kw">new</span> Uint8Array(<span class="str">12</span>)); <span class="cm">// 96-bit</span>
-<span class="kw">const</span> ct = <span class="kw">await</span> crypto.subtle.<span class="fn">encrypt</span>(
-  { name: <span class="str">'AES-GCM'</span>, iv },
-  aesKey,
-  <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(plaintext)
-);
-      </div>
+
     </div>
 
     <!-- HMAC -->
@@ -904,15 +890,7 @@ footer strong{color:var(--text2);}
         If an attacker intercepts and modifies even one byte of the message, the HMAC verification will fail — and the receiver rejects the message entirely.<br><br>
         In SecureChat: the receiver verifies the HMAC <em>before</em> decrypting — this is the "verify-then-decrypt" security model.
       </div>
-      <div class="ec-code">
-<span class="cm">// Sign</span>
-<span class="kw">const</span> sig = <span class="kw">await</span> crypto.subtle.<span class="fn">sign</span>(<span class="str">'HMAC'</span>, hmacKey,
-  <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(plaintext));
 
-<span class="cm">// Verify</span>
-<span class="kw">const</span> ok = <span class="kw">await</span> crypto.subtle.<span class="fn">verify</span>(<span class="str">'HMAC'</span>, hmacKey,
-  signature, <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(received));
-      </div>
     </div>
 
     <!-- SHA-256 -->
@@ -931,12 +909,7 @@ footer strong{color:var(--text2);}
         • <strong style="color:var(--text)">Avalanche effect</strong>: One bit change in input → ~half the bits in hash change.<br><br>
         In SecureChat: SHA-256 digests the plaintext message, which is then signed by HMAC. Also used internally within RSA-OAEP.
       </div>
-      <div class="ec-code">
-<span class="kw">const</span> encoded = <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(text);
-<span class="kw">const</span> hashBuf = <span class="kw">await</span> crypto.subtle.<span class="fn">digest</span>(<span class="str">'SHA-256'</span>, encoded);
-<span class="cm">// → 32-byte (256-bit) fixed-size output</span>
-<span class="cm">// → Completely different for any input change</span>
-      </div>
+
     </div>
   </div>
 
@@ -1031,52 +1004,7 @@ footer strong{color:var(--text2);}
   </div>
 </section>
 
-<!-- ════════════════════════════════════════
-     RUBRIC / MARKS
-════════════════════════════════════════ -->
-<div class="divider"></div>
-<section class="section" id="rubric">
-  <div class="section-title">Evaluation <em>Rubric</em></div>
-  <p class="section-desc">How this project scores against each evaluation criterion.</p>
 
-  <div class="rubric-grid">
-    <div class="rcard">
-      <div class="r-score">1<span class="denom">/1</span></div>
-      <div class="r-stars">★★★★★</div>
-      <div class="r-title">Cryptographic Integration</div>
-      <div class="r-reason">Correctly integrates RSA-2048-OAEP (public-key), AES-256-GCM (symmetric), HMAC-SHA256 (authentication), and SHA-256 (hashing) in a coherent pipeline.</div>
-    </div>
-    <div class="rcard">
-      <div class="r-score">1<span class="denom">/1</span></div>
-      <div class="r-stars">★★★★★</div>
-      <div class="r-title">System Design</div>
-      <div class="r-reason">Well-structured hybrid encryption architecture with clear separation of key exchange, encryption, authentication, and decryption layers. Architecture diagram included.</div>
-    </div>
-    <div class="rcard">
-      <div class="r-score">1<span class="denom">/1</span></div>
-      <div class="r-stars">★★★★★</div>
-      <div class="r-title">Implementation & Functionality</div>
-      <div class="r-reason">Fully functional working system. Send encrypted messages, view cryptographic details, tamper simulation, live crypto log, key generation — all using real Web Crypto API.</div>
-    </div>
-    <div class="rcard">
-      <div class="r-score">1<span class="denom">/1</span></div>
-      <div class="r-stars">★★★★★</div>
-      <div class="r-title">Security Awareness</div>
-      <div class="r-reason">Comprehensive threat model table identifies 5 mitigated threats with algorithms, plus 3 known limitations with real-world solutions. Tamper attack demo shows signature failure live.</div>
-    </div>
-    <div class="rcard">
-      <div class="r-score">1<span class="denom">/1</span></div>
-      <div class="r-stars">★★★★★</div>
-      <div class="r-title">Presentation & Documentation</div>
-      <div class="r-reason">Complete pitch page: hero section, step-by-step explanation, architecture diagram, live demo, concept cards with code, security analysis, rubric review, and crypto log.</div>
-    </div>
-  </div>
-
-  <div style="margin-top:28px;text-align:center;padding:28px;background:var(--card);border:1px solid rgba(6,214,160,0.25);border-radius:14px;">
-    <div style="font-family:var(--serif);font-size:36px;color:var(--glow2);">5 / 5</div>
-    <div style="font-size:14px;color:var(--text2);margin-top:6px;">Full marks — Applied Cryptography Mini Project</div>
-  </div>
-</section>
 
 <!-- FOOTER -->
 <div class="divider"></div>
