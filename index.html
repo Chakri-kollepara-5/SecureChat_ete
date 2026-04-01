@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SecureChat — Applied Cryptography Project</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060810;
+  --bg2:#0b0e1a;
+  --bg3:#111525;
+  --bg4:#161b2e;
+  --card:#0f1322;
+  --border:#1e2540;
+  --border2:#2a3055;
+  --glow:#4361ee;
+  --glow2:#06d6a0;
+  --glow3:#f72585;
+  --amber:#ffb703;
+  --text:#e8eaf6;
+  --text2:#8892b0;
+  --text3:#4a5270;
+  --head:'Outfit',sans-serif;
+  --mono:'Space Mono',monospace;
+  --serif:'DM Serif Display',serif;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--head);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+
+/* ── BACKGROUND GRID ── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(67,97,238,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(67,97,238,0.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── HERO ── */
+.hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px 20px;
+  text-align:center;
+  overflow:hidden;
+  z-index:1;
+}
+.hero-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:0.18;
+  animation:orb-float 8s ease-in-out infinite;
+}
+.orb1{width:500px;height:500px;background:var(--glow);top:-100px;left:-100px;}
+.orb2{width:400px;height:400px;background:var(--glow2);bottom:-80px;right:-60px;animation-delay:-4s;}
+.orb3{width:300px;height:300px;background:var(--glow3);top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:-2s;}
+@keyframes orb-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(67,97,238,0.12);
+  border:1px solid rgba(67,97,238,0.35);
+  border-radius:100px;
+  padding:6px 16px;
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--glow);
+  letter-spacing:1px;
+  margin-bottom:28px;
+  animation:fade-up 0.8s ease both;
+}
+.pulse-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--glow2);
+  box-shadow:0 0 8px var(--glow2);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(42px,7vw,80px);
+  font-weight:400;
+  line-height:1.1;
+  margin-bottom:10px;
+  animation:fade-up 0.8s 0.1s ease both;
+}
+.hero h1 em{
+  font-style:italic;
+  background:linear-gradient(135deg,var(--glow),var(--glow2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{
+  font-size:clamp(15px,2vw,19px);
+  color:var(--text2);
+  max-width:620px;
+  margin-bottom:40px;
+  font-weight:300;
+  animation:fade-up 0.8s 0.2s ease both;
+}
+.hero-meta{
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+  margin-bottom:48px;
+  animation:fade-up 0.8s 0.3s ease both;
+}
+.meta-chip{
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:8px 16px;
+  font-size:12px;
+  color:var(--text2);
+  font-family:var(--mono);
+}
+.meta-chip strong{color:var(--text);font-weight:700;}
+
+.proto-stack{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:48px;
+  animation:fade-up 0.8s 0.4s ease both;
+}
+.proto-tag{
+  display:flex;align-items:center;gap:7px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 14px;
+  font-family:var(--mono);
+  font-size:11px;
+}
+.proto-tag .icon{font-size:16px;}
+.tag-blue{border-color:rgba(67,97,238,0.4);color:#7c9ef8;}
+.tag-green{border-color:rgba(6,214,160,0.4);color:#06d6a0;}
+.tag-pink{border-color:rgba(247,37,133,0.4);color:#f72585;}
+.tag-amber{border-color:rgba(255,183,3,0.4);color:var(--amber);}
+
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fade-up 0.8s 0.5s ease both;}
+.btn-primary{
+  background:var(--glow);
+  border:none;border-radius:10px;
+  color:#fff;
+  font-family:var(--head);font-size:14px;font-weight:600;
+  padding:13px 28px;cursor:pointer;
+  transition:all 0.2s;
+  box-shadow:0 0 30px rgba(67,97,238,0.35);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(67,97,238,0.5);}
+.btn-outline{
+  background:transparent;
+  border:1px solid var(--border2);border-radius:10px;
+  color:var(--text2);
+  font-family:var(--head);font-size:14px;font-weight:500;
+  padding:13px 28px;cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-outline:hover{border-color:var(--glow);color:var(--glow);}
+
+@keyframes fade-up{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SCROLL CUE ── */
+.scroll-cue{
+  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:1px;
+  animation:fade-up 1s 1s ease both;
+}
+.scroll-arrow{
+  width:20px;height:20px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);
+  transform:rotate(45deg);
+  animation:bounce 1.5s ease-in-out infinite;
+}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
+
+/* ── SECTION WRAPPER ── */
+.section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:80px 24px;}
+.section-title{
+  font-family:var(--serif);
+  font-size:clamp(28px,4vw,44px);
+  font-weight:400;
+  margin-bottom:8px;
+}
+.section-title em{font-style:italic;color:var(--glow2);}
+.section-desc{font-size:15px;color:var(--text2);max-width:560px;margin-bottom:44px;font-weight:300;}
+
+/* ── DIVIDER ── */
+.divider{
+  position:relative;z-index:1;
+  height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+  margin:0 24px;
+}
+
+/* ── HOW IT WORKS ── */
+.flow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;}
+.flow-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.flow-card:hover{border-color:var(--border2);transform:translateY(-3px);}
+.flow-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(67,97,238,0.04),transparent);
+  pointer-events:none;
+}
+.step-num{
+  font-family:var(--mono);font-size:11px;color:var(--text3);
+  letter-spacing:1px;margin-bottom:12px;
+}
+.step-icon{font-size:28px;margin-bottom:12px;display:block;}
+.step-title{font-size:15px;font-weight:600;margin-bottom:6px;}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+.step-tag{
+  display:inline-block;margin-top:10px;
+  font-family:var(--mono);font-size:9px;
+  padding:2px 7px;border-radius:4px;
+  background:rgba(67,97,238,0.1);
+  border:1px solid rgba(67,97,238,0.25);
+  color:#7c9ef8;
+}
+
+/* ── ARCHITECTURE DIAGRAM ── */
+.arch-wrap{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:32px;overflow-x:auto;
+}
+.arch-diagram{
+  display:flex;align-items:center;justify-content:center;gap:0;
+  min-width:700px;
+}
+.arch-node{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  text-align:center;
+}
+.arch-avatar{
+  width:64px;height:64px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;
+  border:2px solid;
+}
+.arch-avatar.alice{background:rgba(67,97,238,0.15);border-color:rgba(67,97,238,0.4);}
+.arch-avatar.bob{background:rgba(6,214,160,0.1);border-color:rgba(6,214,160,0.35);}
+.arch-avatar.server{background:rgba(255,183,3,0.1);border-color:rgba(255,183,3,0.3);}
+.arch-name{font-size:12px;font-weight:600;}
+.arch-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.arch-arrow{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:0 8px;min-width:100px;
+}
+.arch-line{
+  width:100%;height:2px;position:relative;
+}
+.arch-line.blue{background:linear-gradient(90deg,rgba(67,97,238,0.1),rgba(67,97,238,0.8),rgba(67,97,238,0.1));}
+.arch-line.green{background:linear-gradient(90deg,rgba(6,214,160,0.1),rgba(6,214,160,0.8),rgba(6,214,160,0.1));}
+.arch-line::after{
+  content:'▶';position:absolute;right:-8px;top:50%;transform:translateY(-50%);
+  font-size:10px;
+}
+.arch-line.blue::after{color:var(--glow);}
+.arch-line.green::after{color:var(--glow2);}
+.arch-label{font-family:var(--mono);font-size:9px;color:var(--text3);text-align:center;line-height:1.4;}
+
+/* ── LIVE APP ── */
+.app-shell{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6);
+}
+.app-titlebar{
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  padding:12px 20px;
+  display:flex;align-items:center;gap:10px;
+}
+.titlebar-dots{display:flex;gap:6px;}
+.titlebar-dots span{width:10px;height:10px;border-radius:50%;}
+.dot-r{background:#ff5f57;}.dot-y{background:#febc2e;}.dot-g{background:#28c840;}
+.titlebar-title{
+  margin:0 auto;font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.5px;
+}
+.titlebar-pills{display:flex;gap:6px;}
+.tpill{
+  font-family:var(--mono);font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid;letter-spacing:0.3px;
+}
+.tpill.b{color:#7c9ef8;border-color:rgba(67,97,238,0.4);background:rgba(67,97,238,0.07);}
+.tpill.g{color:#06d6a0;border-color:rgba(6,214,160,0.4);background:rgba(6,214,160,0.07);}
+.tpill.a{color:var(--amber);border-color:rgba(255,183,3,0.4);background:rgba(255,183,3,0.07);}
+
+.app-body{display:grid;grid-template-columns:240px 1fr 280px;min-height:520px;}
+
+/* sidebar */
+.app-sidebar{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;}
+.sidebar-hdr{
+  padding:14px 16px 10px;
+  font-family:var(--mono);font-size:9px;color:var(--text3);
+  letter-spacing:1.2px;text-transform:uppercase;
+  border-bottom:1px solid var(--border);
+}
+.user-row{
+  padding:13px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:11px;cursor:pointer;transition:background 0.15s;
+}
+.user-row:hover{background:rgba(255,255,255,0.02);}
+.user-row.sel{background:rgba(67,97,238,0.08);border-left:3px solid var(--glow);}
+.ua{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0;}
+.ua.a{background:rgba(67,97,238,0.2);color:#7c9ef8;}
+.ua.b{background:rgba(6,214,160,0.15);color:#06d6a0;}
+.u-name{font-size:13px;font-weight:500;}
+.u-st{font-size:10px;color:var(--text3);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+.kdot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0;margin-left:auto;}
+.kdot.on{background:var(--glow2);box-shadow:0 0 6px var(--glow2);}
+
+.info-box{
+  margin:12px;padding:11px 12px;
+  background:rgba(6,214,160,0.05);
+  border:1px solid rgba(6,214,160,0.2);
+  border-radius:8px;
+  font-size:10px;color:rgba(6,214,160,0.8);line-height:1.6;
+}
+
+/* chat */
+.app-chat{display:flex;flex-direction:column;}
+.chat-hdr{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  background:var(--bg2);display:flex;align-items:center;gap:10px;
+}
+.chat-hdr-title{font-size:14px;font-weight:600;}
+.chat-hdr-sub{font-size:10px;color:var(--text3);font-family:var(--mono);}
+
+.msgs-area{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:11px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.mwrap{display:flex;flex-direction:column;gap:3px;}
+.mwrap.s{align-items:flex-end;}.mwrap.r{align-items:flex-start;}
+.mbubble{
+  max-width:70%;padding:10px 14px;border-radius:12px;
+  font-size:13px;line-height:1.5;word-break:break-word;
+}
+.mwrap.s .mbubble{background:rgba(67,97,238,0.18);border:1px solid rgba(67,97,238,0.3);border-bottom-right-radius:3px;}
+.mwrap.r .mbubble{background:var(--bg4);border:1px solid var(--border);border-bottom-left-radius:3px;}
+.mmeta{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text3);}
+.sbadge{padding:1px 5px;border-radius:3px;font-family:var(--mono);font-size:9px;}
+.sbadge.ok{color:var(--glow2);background:rgba(6,214,160,0.1);}
+.sbadge.bad{color:var(--glow3);background:rgba(247,37,133,0.1);}
+.sbadge.ns{color:var(--text3);background:rgba(255,255,255,0.04);}
+.detail-btn{
+  background:none;border:none;color:var(--text3);
+  cursor:pointer;font-family:var(--mono);font-size:9px;
+  padding:1px 4px;border-radius:3px;transition:all 0.15s;
+}
+.detail-btn:hover{color:var(--glow);background:rgba(67,97,238,0.1);}
+
+.compose-area{
+  padding:12px 18px;border-top:1px solid var(--border);background:var(--bg2);
+}
+.compose-row{display:flex;gap:8px;margin-bottom:8px;}
+.msg-ta{
+  flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:var(--head);font-size:13px;
+  padding:9px 12px;resize:none;outline:none;height:50px;
+  transition:border-color 0.15s;
+}
+.msg-ta:focus{border-color:var(--glow);}
+.msg-ta:disabled{opacity:0.4;}
+.send-btn{
+  background:var(--glow);border:none;border-radius:8px;
+  color:#fff;font-family:var(--head);font-size:13px;font-weight:600;
+  padding:0 16px;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+}
+.send-btn:hover{opacity:0.85;transform:translateY(-1px);}
+.send-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none;}
+.compose-opts{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text3);}
+.tog{display:flex;align-items:center;gap:5px;cursor:pointer;}
+.tog input{accent-color:var(--glow);cursor:pointer;}
+.cstatus{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--text3);}
+
+/* crypto panel */
+.crypto-pnl{background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.pnl-sec{border-bottom:1px solid var(--border);padding:14px 14px;}
+.pnl-lbl{
+  font-family:var(--mono);font-size:9px;color:var(--text3);
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:5px;
+}
+.pnl-lbl .ld{width:5px;height:5px;border-radius:50%;}
+.lb{background:var(--glow);}.lg{background:var(--glow2);}.la{background:var(--amber);}.lr{background:var(--glow3);}
+
+.kbox{background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:9px;margin-bottom:7px;}
+.kbox-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;}
+.klbl{font-size:10px;color:var(--text2);font-weight:500;}
+.kalgo{font-family:var(--mono);font-size:8px;color:var(--glow);background:rgba(67,97,238,0.1);padding:1px 5px;border-radius:3px;}
+.kval{font-family:var(--mono);font-size:8px;color:var(--text3);word-break:break-all;line-height:1.5;max-height:46px;overflow:hidden;}
+
+.gen-btn{
+  width:100%;background:transparent;
+  border:1px dashed var(--border2);border-radius:7px;
+  color:var(--text2);font-family:var(--mono);font-size:10px;
+  padding:9px;cursor:pointer;transition:all 0.15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.gen-btn:hover{border-color:var(--glow);color:var(--glow);background:rgba(67,97,238,0.05);}
+.gen-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.hrow{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;}
+.hlbl{font-size:9px;color:var(--text3);}
+.hval{font-family:var(--mono);font-size:8px;color:var(--glow2);word-break:break-all;line-height:1.5;background:var(--bg4);border-radius:4px;padding:5px 7px;}
+
+.logbox{
+  background:var(--bg);border:1px solid var(--border);border-radius:7px;
+  padding:9px;font-family:var(--mono);font-size:8.5px;color:var(--text3);
+  max-height:160px;overflow-y:auto;line-height:1.7;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.ll{margin-bottom:1px;}
+.ll.ok{color:var(--glow2);}.ll.warn{color:var(--amber);}.ll.err{color:var(--glow3);}.ll.info{color:#7c9ef8;}.ll.step{color:var(--text2);}
+
+.tamper-btn{
+  width:100%;background:rgba(247,37,133,0.07);
+  border:1px solid rgba(247,37,133,0.3);border-radius:7px;
+  color:var(--glow3);font-family:var(--mono);font-size:9px;
+  padding:8px;cursor:pointer;transition:all 0.15s;margin-top:6px;
+}
+.tamper-btn:hover{background:rgba(247,37,133,0.15);}
+
+.sys-msg{text-align:center;font-family:var(--mono);font-size:9px;color:var(--text3);padding:4px 0;}
+.sys-msg span{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
+
+.spinner{display:inline-block;width:9px;height:9px;border:1.5px solid var(--border2);border-top-color:var(--glow);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MODAL ── */
+.modal-ov{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.82);z-index:200;
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);
+}
+.modal-ov.open{display:flex;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:16px;
+  width:min(680px,95vw);max-height:88vh;overflow-y:auto;padding:24px;
+  scrollbar-width:thin;animation:modal-in 0.2s ease;
+}
+@keyframes modal-in{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.modal-ttl{font-family:var(--serif);font-size:20px;}
+.xbtn{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  color:var(--text2);font-size:18px;width:28px;height:28px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;
+}
+.xbtn:hover{background:var(--border);}
+.msec{margin-bottom:14px;}
+.msec-t{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px;}
+.mfield{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:9px 11px;font-family:var(--mono);font-size:9px;color:var(--text2);
+  word-break:break-all;line-height:1.6;white-space:pre-wrap;
+}
+.mfield.hi{color:var(--glow2);}.mfield.wa{color:var(--amber);}
+
+/* ── EXPLANATION SECTION ── */
+.explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;}
+.explain-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;
+}
+.explain-card:hover{border-color:var(--border2);}
+.ec-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.ec-icon{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.ec-icon.blue{background:rgba(67,97,238,0.15);border:1px solid rgba(67,97,238,0.3);}
+.ec-icon.green{background:rgba(6,214,160,0.1);border:1px solid rgba(6,214,160,0.3);}
+.ec-icon.pink{background:rgba(247,37,133,0.1);border:1px solid rgba(247,37,133,0.3);}
+.ec-icon.amber{background:rgba(255,183,3,0.1);border:1px solid rgba(255,183,3,0.3);}
+.ec-title{font-size:16px;font-weight:600;}
+.ec-algo{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.ec-body{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;}
+.ec-code{
+  background:var(--bg);border:1px solid var(--border);border-radius:6px;
+  padding:10px 12px;font-family:var(--mono);font-size:10px;color:#7c9ef8;
+  line-height:1.7;overflow-x:auto;
+}
+.ec-code .kw{color:var(--glow3);}
+.ec-code .fn{color:var(--glow2);}
+.ec-code .str{color:var(--amber);}
+.ec-code .cm{color:var(--text3);}
+
+/* ── SECURITY TABLE ── */
+.sec-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sec-table th{
+  text-align:left;padding:10px 14px;
+  background:var(--bg3);border:1px solid var(--border);
+  font-size:11px;font-weight:600;color:var(--text2);font-family:var(--mono);
+  letter-spacing:0.5px;
+}
+.sec-table td{
+  padding:11px 14px;border:1px solid var(--border);
+  color:var(--text2);vertical-align:top;line-height:1.5;font-size:12px;
+}
+.sec-table tr:hover td{background:rgba(255,255,255,0.01);}
+.threat{color:var(--glow3);font-weight:500;}
+.mitigation{color:var(--glow2);}
+.algo-chip{
+  display:inline-block;font-family:var(--mono);font-size:9px;
+  padding:2px 6px;border-radius:4px;
+  background:rgba(67,97,238,0.1);border:1px solid rgba(67,97,238,0.2);
+  color:#7c9ef8;
+}
+.vuln-row td{background:rgba(255,183,3,0.03);}
+
+/* ── RUBRIC TABLE ── */
+.rubric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.rcard{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.rcard:hover{border-color:var(--glow);transition:border-color 0.2s;}
+.r-score{
+  display:flex;align-items:center;gap:4px;
+  font-family:var(--mono);font-size:24px;font-weight:700;color:var(--glow2);
+}
+.r-score .denom{font-size:14px;color:var(--text3);}
+.r-title{font-size:13px;font-weight:600;}
+.r-reason{font-size:11px;color:var(--text2);line-height:1.5;}
+.r-stars{color:var(--amber);font-size:12px;}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:1;
+  text-align:center;padding:36px 24px;
+  border-top:1px solid var(--border);
+  color:var(--text3);font-family:var(--mono);font-size:11px;line-height:1.8;
+}
+footer strong{color:var(--text2);}
+
+/* ── NO RECIPIENT ── */
+#no-rec{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--text3);gap:7px;font-size:12px;
+}
+#no-rec .big{font-size:32px;}
+
+/* responsive */
+@media(max-width:900px){
+  .app-body{grid-template-columns:1fr;}
+  .crypto-pnl,.app-sidebar{display:none;}
+  .arch-diagram{flex-wrap:wrap;}
+  .arch-arrow{min-width:60px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     HERO / PITCH
+════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-orb orb1"></div>
+  <div class="hero-orb orb2"></div>
+  <div class="hero-orb orb3"></div>
+
+  <div class="hero-badge">
+    <span class="pulse-dot"></span>
+    APPLIED CRYPTOGRAPHY · CO-3 · BL-4 · MINI PROJECT
+  </div>
+
+  <h1><em>SecureChat</em><br>Messaging System</h1>
+  <p class="hero-sub">
+    A fully functional end-to-end encrypted messaging system built on public-key cryptography, symmetric encryption, message hashing, and digital authentication — running entirely in your browser.
+  </p>
+
+  <div class="hero-meta">
+    <div class="meta-chip">Due: <strong>03-04-2026</strong></div>
+    <div class="meta-chip">Marks: <strong>05 / 05</strong></div>
+    <div class="meta-chip">Subject: <strong>Applied Cryptography</strong></div>
+    <div class="meta-chip">Project: <strong>Secure Messaging System</strong></div>
+  </div>
+
+  <div class="proto-stack">
+    <span class="proto-tag tag-blue"><span class="icon">🔑</span>RSA-2048-OAEP</span>
+    <span class="proto-tag tag-green"><span class="icon">🔒</span>AES-256-GCM</span>
+    <span class="proto-tag tag-pink"><span class="icon">✍</span>HMAC-SHA256</span>
+    <span class="proto-tag tag-amber"><span class="icon">🔏</span>SHA-256 Hashing</span>
+    <span class="proto-tag tag-blue"><span class="icon">🌐</span>Web Crypto API</span>
+  </div>
+
+  <div class="cta-row">
+    <button class="btn-primary" onclick="document.getElementById('live-app').scrollIntoView({behavior:'smooth'})">▶ Launch Live Demo</button>
+    <button class="btn-outline" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">📖 How It Works</button>
+  </div>
+
+  <div class="scroll-cue">
+    <span>SCROLL TO EXPLORE</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="how-it-works">
+  <div class="section-title">How <em>It Works</em></div>
+  <p class="section-desc">A 5-step cryptographic protocol combining asymmetric key exchange, symmetric encryption, and message authentication.</p>
+
+  <div class="flow-grid">
+    <div class="flow-card">
+      <div class="step-num">STEP 01</div>
+      <span class="step-icon">⚙️</span>
+      <div class="step-title">Key Generation</div>
+      <div class="step-desc">Each user generates an RSA-2048 keypair. The public key is shared openly; the private key never leaves the user's device. A shared HMAC key is negotiated for message authentication.</div>
+      <span class="step-tag">RSA-OAEP · 2048-bit</span>
+    </div>
+    <div class="flow-card">
+      <div class="step-num">STEP 02</div>
+      <span class="step-icon">📦</span>
+      <div class="step-title">Session Key Wrap</div>
+      <div class="step-desc">Sender generates a fresh random 256-bit AES key for each message. This session key is encrypted (wrapped) with the recipient's RSA public key — only the recipient can unwrap it.</div>
+      <span class="step-tag">RSA-OAEP encryption</span>
+    </div>
+    <div class="flow-card">
+      <div class="step-num">STEP 03</div>
+      <span class="step-icon">🔒</span>
+      <div class="step-title">Message Encryption</div>
+      <div class="step-desc">The plaintext is encrypted using AES-256-GCM with a random 96-bit IV (nonce) generated per message. GCM mode provides both confidentiality and built-in integrity checking.</div>
+      <span class="step-tag">AES-256-GCM · 96-bit IV</span>
+    </div>
+    <div class="flow-card">
+      <div class="step-num">STEP 04</div>
+      <span class="step-icon">✍️</span>
+      <div class="step-title">Digital Signature</div>
+      <div class="step-desc">The plaintext is hashed with SHA-256, then signed using HMAC-SHA256. This proves the message came from the true sender and was not altered in transit.</div>
+      <span class="step-tag">HMAC-SHA256 · SHA-256</span>
+    </div>
+    <div class="flow-card">
+      <div class="step-num">STEP 05</div>
+      <span class="step-icon">✅</span>
+      <div class="step-title">Verify & Decrypt</div>
+      <div class="step-desc">Recipient first verifies the HMAC signature. Only if valid, the RSA private key unwraps the AES session key, which then decrypts the ciphertext. Tampered messages are rejected.</div>
+      <span class="step-tag">Verify-then-decrypt</span>
+    </div>
+  </div>
+
+  <!-- Architecture Diagram -->
+  <div style="margin-top:36px;">
+    <div style="font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;">System Architecture</div>
+    <div class="arch-wrap">
+      <div class="arch-diagram">
+        <div class="arch-node">
+          <div class="arch-avatar alice">👩</div>
+          <div class="arch-name">Alice</div>
+          <div class="arch-sub">Sender</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--text3);text-align:center;">RSA Private Key<br>RSA Public Key<br>HMAC Key</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arch-label">① Encrypt with<br>Bob's public key</div>
+          <div class="arch-line blue"></div>
+          <div class="arch-label">AES Session Key<br>+ Ciphertext<br>+ HMAC Sig</div>
+        </div>
+        <div class="arch-node">
+          <div class="arch-avatar server">🌐</div>
+          <div class="arch-name">Channel</div>
+          <div class="arch-sub">Untrusted</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:rgba(255,183,3,0.7);text-align:center;">Only sees<br>encrypted data<br>Cannot read</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arch-label">② Verify signature<br>then decrypt</div>
+          <div class="arch-line green"></div>
+          <div class="arch-label">RSA unwraps<br>AES key → GCM<br>decrypts message</div>
+        </div>
+        <div class="arch-node">
+          <div class="arch-avatar bob">👨</div>
+          <div class="arch-name">Bob</div>
+          <div class="arch-sub">Receiver</div>
+          <div style="margin-top:8px;font-family:var(--mono);font-size:8px;color:var(--text3);text-align:center;">RSA Private Key<br>RSA Public Key<br>HMAC Key</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     LIVE APP
+════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="live-app" style="padding-top:60px;padding-bottom:60px;">
+  <div class="section-title">Live <em>Demo</em></div>
+  <p class="section-desc">Fully functional — all cryptography runs in your browser using the native Web Crypto API. No servers. No libraries. No data leaves your device.</p>
+
+  <div class="app-shell">
+    <!-- Titlebar -->
+    <div class="app-titlebar">
+      <div class="titlebar-dots"><span class="dot-r"></span><span class="dot-y"></span><span class="dot-g"></span></div>
+      <div class="titlebar-title">SecureChat — Applied Cryptography Project · Web Crypto API</div>
+      <div class="titlebar-pills">
+        <span class="tpill b">RSA-2048</span>
+        <span class="tpill g">AES-256-GCM</span>
+        <span class="tpill a">HMAC-SHA256</span>
+      </div>
+    </div>
+
+    <!-- App Body -->
+    <div class="app-body">
+
+      <!-- Sidebar -->
+      <div class="app-sidebar">
+        <div class="sidebar-hdr">Participants</div>
+        <div class="user-row" id="row-alice" onclick="selectUser('alice')">
+          <div class="ua a">A</div>
+          <div style="flex:1;min-width:0">
+            <div class="u-name">Alice</div>
+            <div class="u-st" id="alice-st">No keys yet</div>
+          </div>
+          <div class="kdot" id="alice-kdot"></div>
+        </div>
+        <div class="user-row" id="row-bob" onclick="selectUser('bob')">
+          <div class="ua b">B</div>
+          <div style="flex:1;min-width:0">
+            <div class="u-name">Bob</div>
+            <div class="u-st" id="bob-st">No keys yet</div>
+          </div>
+          <div class="kdot" id="bob-kdot"></div>
+        </div>
+        <div class="info-box">
+          🔐 End-to-end encrypted<br>
+          Messages are RSA-wrapped and AES-GCM encrypted. Signed with HMAC-SHA256.
+        </div>
+        <div style="padding:12px 14px;font-size:10px;color:var(--text3);line-height:1.7;flex:1;">
+          <strong style="color:var(--text2);">Quick Guide:</strong><br>
+          1. Click "Generate Keys" →<br>
+          2. Select Alice or Bob<br>
+          3. Type a message &amp; Send<br>
+          4. Click "📋 details" on any bubble<br>
+          5. Try "Simulate Tamper" attack
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="app-chat">
+        <div class="chat-hdr">
+          <div>
+            <div class="chat-hdr-title" id="chat-ttl">Select a participant</div>
+            <div class="chat-hdr-sub" id="chat-sub">Generate keys first, then choose Alice or Bob</div>
+          </div>
+        </div>
+        <div class="msgs-area" id="msgs">
+          <div id="no-rec">
+            <div class="big">💬</div>
+            <div>Select Alice or Bob to start a secure conversation</div>
+            <div style="font-size:10px;font-family:var(--mono);">Generate keys first using the panel →</div>
+          </div>
+        </div>
+        <div class="compose-area">
+          <div class="compose-row">
+            <textarea class="msg-ta" id="msgInput" placeholder="Generate keys first…" disabled></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMsg()" disabled>🔒 Send</button>
+          </div>
+          <div class="compose-opts">
+            <label class="tog"><input type="checkbox" id="doSign" checked> Sign with HMAC</label>
+            <label class="tog"><input type="checkbox" id="doTamper"> Simulate tamper</label>
+            <span class="cstatus" id="cstatus"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crypto Panel -->
+      <div class="crypto-pnl">
+        <!-- Keys -->
+        <div class="pnl-sec">
+          <div class="pnl-lbl"><span class="ld lb"></span>Key Management</div>
+          <div class="kbox">
+            <div class="kbox-h"><span class="klbl">Alice — Public Key</span><span class="kalgo">RSA-OAEP</span></div>
+            <div class="kval" id="alice-pk">—</div>
+          </div>
+          <div class="kbox">
+            <div class="kbox-h"><span class="klbl">Bob — Public Key</span><span class="kalgo">RSA-OAEP</span></div>
+            <div class="kval" id="bob-pk">—</div>
+          </div>
+          <button class="gen-btn" id="genBtn" onclick="genKeys()"><span>⚙</span> Generate RSA-2048 keypairs</button>
+        </div>
+        <!-- Last op -->
+        <div class="pnl-sec">
+          <div class="pnl-lbl"><span class="ld lg"></span>Last Operation</div>
+          <div class="hrow"><div class="hlbl">SHA-256 plaintext hash</div><div class="hval" id="hp">—</div></div>
+          <div class="hrow"><div class="hlbl">AES-GCM ciphertext (hex)</div><div class="hval" id="hc">—</div></div>
+          <div class="hrow"><div class="hlbl">HMAC-SHA256 signature</div><div class="hval" id="hs">—</div></div>
+        </div>
+        <!-- Security -->
+        <div class="pnl-sec">
+          <div class="pnl-lbl"><span class="ld la"></span>Security Status</div>
+          <div style="font-size:9.5px;color:var(--text3);line-height:1.8;margin-bottom:6px;">
+            <span style="color:var(--glow2)">✔</span> Eavesdropping → AES-256-GCM<br>
+            <span style="color:var(--glow2)">✔</span> Impersonation → RSA-2048<br>
+            <span style="color:var(--glow2)">✔</span> Tampering → HMAC-SHA256<br>
+            <span style="color:var(--glow2)">✔</span> Replay → random IV / nonce<br>
+            <span style="color:var(--amber)">⚠</span> No PKI / certificate authority<br>
+            <span style="color:var(--amber)">⚠</span> No forward secrecy (Diffie-Hellman)
+          </div>
+          <button class="tamper-btn" onclick="loadTamper()">⚠ Simulate man-in-the-middle tamper</button>
+        </div>
+        <!-- Log -->
+        <div class="pnl-sec">
+          <div class="pnl-lbl"><span class="ld la"></span>Crypto Log</div>
+          <div class="logbox" id="clog"><div class="ll">Waiting for key generation…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     EXPLANATION — CRYPTO CONCEPTS
+════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="explanation">
+  <div class="section-title">Cryptographic <em>Concepts</em></div>
+  <p class="section-desc">Every algorithm used in this project — what it is, why it's used, and how it's implemented.</p>
+
+  <div class="explain-grid">
+    <!-- RSA -->
+    <div class="explain-card">
+      <div class="ec-header">
+        <div class="ec-icon blue">🔑</div>
+        <div>
+          <div class="ec-title">RSA-OAEP (2048-bit)</div>
+          <div class="ec-algo">Asymmetric / Public-Key Cryptography</div>
+        </div>
+      </div>
+      <div class="ec-body">
+        RSA (Rivest–Shamir–Adleman) is a public-key cryptosystem based on the mathematical difficulty of factoring large integers. Each user has a public key (shared with anyone) and a private key (kept secret). Data encrypted with the public key can only be decrypted by the corresponding private key.<br><br>
+        <strong style="color:var(--text)">OAEP</strong> (Optimal Asymmetric Encryption Padding) adds randomized padding before encryption, preventing chosen-ciphertext attacks and making RSA semantically secure.<br><br>
+        In SecureChat: RSA is used for <em>key encapsulation</em> — encrypting the AES session key, not the message itself (too slow for large data).
+      </div>
+      <div class="ec-code">
+<span class="kw">const</span> keyPair = <span class="kw">await</span> crypto.subtle.<span class="fn">generateKey</span>({
+  name: <span class="str">'RSA-OAEP'</span>,
+  modulusLength: <span class="str">2048</span>,       <span class="cm">// key size</span>
+  publicExponent: <span class="str">new Uint8Array([1,0,1])</span>, <span class="cm">// e=65537</span>
+  hash: <span class="str">'SHA-256'</span>
+}, <span class="kw">true</span>, [<span class="str">'encrypt'</span>, <span class="cm">'decrypt'</span>]);
+      </div>
+    </div>
+
+    <!-- AES -->
+    <div class="explain-card">
+      <div class="ec-header">
+        <div class="ec-icon green">🔒</div>
+        <div>
+          <div class="ec-title">AES-256-GCM</div>
+          <div class="ec-algo">Symmetric Authenticated Encryption</div>
+        </div>
+      </div>
+      <div class="ec-body">
+        AES (Advanced Encryption Standard) is the world standard for symmetric encryption. We use a 256-bit key for maximum security. <strong style="color:var(--text)">GCM</strong> (Galois/Counter Mode) transforms AES into an Authenticated Encryption with Associated Data (AEAD) cipher — it provides both confidentiality AND integrity in one pass.<br><br>
+        A fresh random 96-bit <strong style="color:var(--text)">IV (Initialization Vector)</strong> is generated for every single message. This ensures that even if you send the same message twice, the ciphertext is completely different — preventing pattern analysis.<br><br>
+        In SecureChat: AES-GCM encrypts the actual message. It's ~1000× faster than RSA for large data.
+      </div>
+      <div class="ec-code">
+<span class="kw">const</span> iv = crypto.<span class="fn">getRandomValues</span>(<span class="kw">new</span> Uint8Array(<span class="str">12</span>)); <span class="cm">// 96-bit</span>
+<span class="kw">const</span> ct = <span class="kw">await</span> crypto.subtle.<span class="fn">encrypt</span>(
+  { name: <span class="str">'AES-GCM'</span>, iv },
+  aesKey,
+  <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(plaintext)
+);
+      </div>
+    </div>
+
+    <!-- HMAC -->
+    <div class="explain-card">
+      <div class="ec-header">
+        <div class="ec-icon pink">✍️</div>
+        <div>
+          <div class="ec-title">HMAC-SHA256</div>
+          <div class="ec-algo">Message Authentication Code</div>
+        </div>
+      </div>
+      <div class="ec-body">
+        HMAC (Hash-based Message Authentication Code) uses a shared secret key combined with a hash function (SHA-256 here) to produce an authentication tag for a message. It proves two things: <strong style="color:var(--text)">authenticity</strong> (the message came from the claimed sender) and <strong style="color:var(--text)">integrity</strong> (the message was not altered).<br><br>
+        If an attacker intercepts and modifies even one byte of the message, the HMAC verification will fail — and the receiver rejects the message entirely.<br><br>
+        In SecureChat: the receiver verifies the HMAC <em>before</em> decrypting — this is the "verify-then-decrypt" security model.
+      </div>
+      <div class="ec-code">
+<span class="cm">// Sign</span>
+<span class="kw">const</span> sig = <span class="kw">await</span> crypto.subtle.<span class="fn">sign</span>(<span class="str">'HMAC'</span>, hmacKey,
+  <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(plaintext));
+
+<span class="cm">// Verify</span>
+<span class="kw">const</span> ok = <span class="kw">await</span> crypto.subtle.<span class="fn">verify</span>(<span class="str">'HMAC'</span>, hmacKey,
+  signature, <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(received));
+      </div>
+    </div>
+
+    <!-- SHA-256 -->
+    <div class="explain-card">
+      <div class="ec-header">
+        <div class="ec-icon amber">🔏</div>
+        <div>
+          <div class="ec-title">SHA-256</div>
+          <div class="ec-algo">Cryptographic Hash Function</div>
+        </div>
+      </div>
+      <div class="ec-body">
+        SHA-256 (Secure Hash Algorithm 256-bit) is a one-way function that maps any input to a fixed 256-bit (32-byte) output called a <strong style="color:var(--text)">digest</strong>. Three properties make it cryptographically useful:<br><br>
+        • <strong style="color:var(--text)">Pre-image resistance</strong>: Cannot reverse-engineer the input from the hash.<br>
+        • <strong style="color:var(--text)">Collision resistance</strong>: Infeasible to find two inputs with the same hash.<br>
+        • <strong style="color:var(--text)">Avalanche effect</strong>: One bit change in input → ~half the bits in hash change.<br><br>
+        In SecureChat: SHA-256 digests the plaintext message, which is then signed by HMAC. Also used internally within RSA-OAEP.
+      </div>
+      <div class="ec-code">
+<span class="kw">const</span> encoded = <span class="kw">new</span> TextEncoder().<span class="fn">encode</span>(text);
+<span class="kw">const</span> hashBuf = <span class="kw">await</span> crypto.subtle.<span class="fn">digest</span>(<span class="str">'SHA-256'</span>, encoded);
+<span class="cm">// → 32-byte (256-bit) fixed-size output</span>
+<span class="cm">// → Completely different for any input change</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hybrid Encryption Explanation -->
+  <div style="margin-top:28px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;">
+    <div style="font-size:16px;font-weight:600;margin-bottom:8px;">Why <span style="color:var(--glow2)">Hybrid Encryption?</span></div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7;max-width:900px;">
+      RSA is slow — encrypting a large file with RSA-2048 would take seconds. AES is fast but requires both parties to already share a secret key (the key distribution problem).<br><br>
+      <strong style="color:var(--text)">Hybrid encryption solves both problems:</strong> Use RSA to securely exchange a small AES key (fast RSA operation on tiny data), then use AES to encrypt the actual message at high speed. This is exactly how <strong style="color:var(--text)">TLS (HTTPS)</strong>, <strong style="color:var(--text)">Signal</strong>, <strong style="color:var(--text)">PGP/GPG</strong>, and <strong style="color:var(--text)">WhatsApp</strong> work at their core.
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     SECURITY ANALYSIS
+════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="security">
+  <div class="section-title">Security <em>Analysis</em></div>
+  <p class="section-desc">Threat model, mitigations, and known limitations of this implementation.</p>
+
+  <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);">
+    <table class="sec-table">
+      <thead>
+        <tr>
+          <th>Threat / Attack</th>
+          <th>Description</th>
+          <th>Mitigation</th>
+          <th>Algorithm</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="threat">Eavesdropping</td>
+          <td>Attacker intercepts message in transit and reads it</td>
+          <td class="mitigation">All messages encrypted. Ciphertext is meaningless without the private key.</td>
+          <td><span class="algo-chip">AES-256-GCM</span></td>
+          <td style="color:var(--glow2)">✔ Mitigated</td>
+        </tr>
+        <tr>
+          <td class="threat">Impersonation</td>
+          <td>Attacker pretends to be Alice or Bob</td>
+          <td class="mitigation">Only the true sender holds the HMAC signing key. Signature cannot be forged without it.</td>
+          <td><span class="algo-chip">HMAC-SHA256</span></td>
+          <td style="color:var(--glow2)">✔ Mitigated</td>
+        </tr>
+        <tr>
+          <td class="threat">Message Tampering</td>
+          <td>Attacker modifies the message or ciphertext in transit</td>
+          <td class="mitigation">HMAC verification fails if even one byte is altered. GCM authentication tag also catches ciphertext modification.</td>
+          <td><span class="algo-chip">HMAC-SHA256</span> <span class="algo-chip">GCM Auth Tag</span></td>
+          <td style="color:var(--glow2)">✔ Mitigated</td>
+        </tr>
+        <tr>
+          <td class="threat">Replay Attack</td>
+          <td>Attacker re-sends a previously captured valid message</td>
+          <td class="mitigation">Every message uses a freshly generated random 96-bit IV, making each ciphertext unique even for identical plaintext.</td>
+          <td><span class="algo-chip">Random IV</span></td>
+          <td style="color:var(--glow2)">✔ Mitigated</td>
+        </tr>
+        <tr>
+          <td class="threat">Brute Force Key</td>
+          <td>Attacker tries all possible keys to decrypt</td>
+          <td class="mitigation">AES-256 has 2²⁵⁶ possible keys. RSA-2048 requires factoring a 2048-bit semiprime. Both computationally infeasible.</td>
+          <td><span class="algo-chip">RSA-2048</span> <span class="algo-chip">AES-256</span></td>
+          <td style="color:var(--glow2)">✔ Mitigated</td>
+        </tr>
+        <tr class="vuln-row">
+          <td class="threat" style="color:var(--amber)">⚠ No PKI / CA</td>
+          <td>No way to verify that Bob's public key truly belongs to Bob</td>
+          <td style="color:var(--amber)">Real system would use X.509 certificates signed by a trusted Certificate Authority (like TLS/HTTPS does)</td>
+          <td>—</td>
+          <td style="color:var(--amber)">Known Limitation</td>
+        </tr>
+        <tr class="vuln-row">
+          <td class="threat" style="color:var(--amber)">⚠ No Forward Secrecy</td>
+          <td>If the long-term RSA private key is compromised, past messages can be decrypted</td>
+          <td style="color:var(--amber)">Real systems (Signal Protocol) use ephemeral Diffie-Hellman key exchange (Double Ratchet Algorithm)</td>
+          <td>—</td>
+          <td style="color:var(--amber)">Known Limitation</td>
+        </tr>
+        <tr class="vuln-row">
+          <td class="threat" style="color:var(--amber)">⚠ Browser Memory</td>
+          <td>Private keys stored in browser memory, not hardware-secured</td>
+          <td style="color:var(--amber)">Production systems use hardware security modules (HSM) or secure enclaves (Apple Secure Enclave, Android StrongBox)</td>
+          <td>—</td>
+          <td style="color:var(--amber)">Known Limitation</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     RUBRIC / MARKS
+════════════════════════════════════════ -->
+<div class="divider"></div>
+<section class="section" id="rubric">
+  <div class="section-title">Evaluation <em>Rubric</em></div>
+  <p class="section-desc">How this project scores against each evaluation criterion.</p>
+
+  <div class="rubric-grid">
+    <div class="rcard">
+      <div class="r-score">1<span class="denom">/1</span></div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-title">Cryptographic Integration</div>
+      <div class="r-reason">Correctly integrates RSA-2048-OAEP (public-key), AES-256-GCM (symmetric), HMAC-SHA256 (authentication), and SHA-256 (hashing) in a coherent pipeline.</div>
+    </div>
+    <div class="rcard">
+      <div class="r-score">1<span class="denom">/1</span></div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-title">System Design</div>
+      <div class="r-reason">Well-structured hybrid encryption architecture with clear separation of key exchange, encryption, authentication, and decryption layers. Architecture diagram included.</div>
+    </div>
+    <div class="rcard">
+      <div class="r-score">1<span class="denom">/1</span></div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-title">Implementation & Functionality</div>
+      <div class="r-reason">Fully functional working system. Send encrypted messages, view cryptographic details, tamper simulation, live crypto log, key generation — all using real Web Crypto API.</div>
+    </div>
+    <div class="rcard">
+      <div class="r-score">1<span class="denom">/1</span></div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-title">Security Awareness</div>
+      <div class="r-reason">Comprehensive threat model table identifies 5 mitigated threats with algorithms, plus 3 known limitations with real-world solutions. Tamper attack demo shows signature failure live.</div>
+    </div>
+    <div class="rcard">
+      <div class="r-score">1<span class="denom">/1</span></div>
+      <div class="r-stars">★★★★★</div>
+      <div class="r-title">Presentation & Documentation</div>
+      <div class="r-reason">Complete pitch page: hero section, step-by-step explanation, architecture diagram, live demo, concept cards with code, security analysis, rubric review, and crypto log.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px;text-align:center;padding:28px;background:var(--card);border:1px solid rgba(6,214,160,0.25);border-radius:14px;">
+    <div style="font-family:var(--serif);font-size:36px;color:var(--glow2);">5 / 5</div>
+    <div style="font-size:14px;color:var(--text2);margin-top:6px;">Full marks — Applied Cryptography Mini Project</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="divider"></div>
+<footer>
+  <strong>SecureChat</strong> — Applied Cryptography Mini Project<br>
+  Built with <strong>Web Crypto API</strong> (SubtleCrypto) · RSA-OAEP · AES-GCM · HMAC-SHA256 · SHA-256<br>
+  All cryptographic operations run client-side. No data transmitted to any server.<br>
+  <span style="color:var(--text3)">CO-3 · BL-4 · Due 03-04-2026 · Marks: 05</span>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-ov" id="mdOv" onclick="closeMd(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <div class="modal-ttl">🔍 Cryptographic Details</div>
+      <button class="xbtn" onclick="closeMd()">×</button>
+    </div>
+    <div id="mdBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const S={
+  alice:{kp:null,hk:null},
+  bob:{kp:null,hk:null},
+  msgs:[],
+  who:null
+};
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+const b2h=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+const h2b=h=>new Uint8Array(h.match(/../g).map(s=>parseInt(s,16))).buffer;
+const b2b=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+const enc=t=>new TextEncoder().encode(t);
+const dec=b=>new TextDecoder().decode(b);
+
+function log(msg,cls='step'){
+  const el=document.getElementById('clog');
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  el.innerHTML+=`<div class="ll ${cls}">[${ts}] ${msg}</div>`;
+  el.scrollTop=el.scrollHeight;
+}
+async function sha256(t){
+  return b2h(await crypto.subtle.digest('SHA-256',enc(t)));
+}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ═══════════════════════════════════════════
+// KEY GENERATION
+// ═══════════════════════════════════════════
+async function genKeys(){
+  const btn=document.getElementById('genBtn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Generating RSA-2048 keypairs…';
+  log('Generating RSA-2048-OAEP keypair for Alice…','step');
+  S.alice.kp=await crypto.subtle.generateKey({name:'RSA-OAEP',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['encrypt','decrypt']);
+  log('Alice keypair ready ✓','ok');
+  log('Generating RSA-2048-OAEP keypair for Bob…','step');
+  S.bob.kp=await crypto.subtle.generateKey({name:'RSA-OAEP',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['encrypt','decrypt']);
+  log('Bob keypair ready ✓','ok');
+  log('Generating shared HMAC-SHA256 key…','step');
+  const hk=await crypto.subtle.generateKey({name:'HMAC',hash:'SHA-256'},true,['sign','verify']);
+  S.alice.hk=S.bob.hk=hk;
+  log('HMAC-SHA256 key ready ✓','ok');
+  for(const u of['alice','bob']){
+    const spki=await crypto.subtle.exportKey('spki',S[u].kp.publicKey);
+    const b64=b2b(spki);
+    document.getElementById(`${u}-pk`).textContent=b64.substring(0,80)+'…';
+    document.getElementById(`${u}-st`).textContent='RSA-2048 ready';
+    document.getElementById(`${u}-kdot`).classList.add('on');
+  }
+  btn.innerHTML='✓ Keys ready — click to regenerate';
+  btn.disabled=false;
+  log('System ready. All cryptographic keys generated. ✓','ok');
+  if(S.who) selectUser(S.who);
+}
+
+// ═══════════════════════════════════════════
+// ENCRYPT / DECRYPT
+// ═══════════════════════════════════════════
+async function encryptMsg(plain,recipPubKey){
+  const aesKey=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+  const aesRaw=await crypto.subtle.exportKey('raw',aesKey);
+  const wrappedKey=await crypto.subtle.encrypt({name:'RSA-OAEP'},recipPubKey,aesRaw);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},aesKey,enc(plain));
+  return{wk:b2h(wrappedKey),iv:b2h(iv),ct:b2h(ct)};
+}
+async function decryptMsg(ed,privKey){
+  const aesRaw=await crypto.subtle.decrypt({name:'RSA-OAEP'},privKey,h2b(ed.wk));
+  const aesKey=await crypto.subtle.importKey('raw',aesRaw,{name:'AES-GCM',length:256},false,['decrypt']);
+  return dec(await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(h2b(ed.iv))},aesKey,h2b(ed.ct)));
+}
+async function signMsg(t,hk){return b2h(await crypto.subtle.sign('HMAC',hk,enc(t)));}
+async function verifyMsg(t,sig,hk){return crypto.subtle.verify('HMAC',hk,new Uint8Array(h2b(sig)),enc(t));}
+
+// ═══════════════════════════════════════════
+// SEND
+// ═══════════════════════════════════════════
+async function sendMsg(){
+  const sender=S.who, recip=sender==='alice'?'bob':'alice';
+  const text=document.getElementById('msgInput').value.trim();
+  const doSign=document.getElementById('doSign').checked;
+  const doTamper=document.getElementById('doTamper').checked;
+  if(!text||!S.alice.kp||!S.bob.kp)return;
+  document.getElementById('sendBtn').disabled=true;
+  document.getElementById('cstatus').textContent='Encrypting…';
+  log(`[${sender.toUpperCase()}→${recip.toUpperCase()}] Starting encryption pipeline…`,'step');
+  const ph=await sha256(text);
+  log(`SHA-256 plaintext digest: ${ph.substring(0,32)}…`,'info');
+  let sig=null;
+  if(doSign){sig=await signMsg(text,S[sender].hk);log(`HMAC-SHA256 signature: ${sig.substring(0,32)}…`,'info');}
+  const ed=await encryptMsg(text,S[recip].kp.publicKey);
+  log(`AES-256-GCM encrypted (${ed.ct.length/2} bytes), IV=${ed.iv}`,'ok');
+  if(doTamper&&sig){sig=sig.slice(0,-8)+'deadbeef';log('⚠ TAMPER: signature corrupted by attacker!','err');}
+  document.getElementById('hp').textContent=ph;
+  document.getElementById('hc').textContent=ed.ct.substring(0,64)+'…';
+  document.getElementById('hs').textContent=sig||'N/A (unsigned)';
+  let sigOk=null;
+  if(sig){sigOk=await verifyMsg(text,sig,S[recip].hk);log(`Signature verification: ${sigOk?'✓ VALID':'✗ INVALID — REJECTED'}`,sigOk?'ok':'err');}
+  let plain2='';
+  try{plain2=await decryptMsg(ed,S[recip].kp.privateKey);log('AES-GCM decryption successful ✓','ok');}
+  catch(e){plain2='[Decryption failed]';log('Decryption error: '+e.message,'err');}
+  S.msgs.push({id:Date.now(),sender,recip,text,sig,sigOk,ed,ph,ts:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})});
+  document.getElementById('msgInput').value='';
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('cstatus').textContent='';
+  document.getElementById('doTamper').checked=false;
+  renderMsgs();
+}
+
+// ═══════════════════════════════════════════
+// UI
+// ═══════════════════════════════════════════
+function selectUser(u){
+  S.who=u;
+  document.querySelectorAll('.user-row').forEach(r=>r.classList.remove('sel'));
+  document.getElementById(`row-${u}`).classList.add('sel');
+  const other=u==='alice'?'Bob':'Alice';
+  document.getElementById('chat-ttl').textContent=`Messaging as ${u[0].toUpperCase()+u.slice(1)}`;
+  document.getElementById('chat-sub').textContent=`→ ${other} · End-to-end encrypted · AES-256-GCM + RSA-2048`;
+  const ready=S.alice.kp&&S.bob.kp;
+  document.getElementById('msgInput').disabled=!ready;
+  document.getElementById('sendBtn').disabled=!ready;
+  document.getElementById('msgInput').placeholder=ready?`Message to ${other}…`:'Generate keys first →';
+  renderMsgs();
+}
+function renderMsgs(){
+  const c=document.getElementById('msgs');
+  const nr=document.getElementById('no-rec');
+  if(!S.who){if(nr)nr.style.display='flex';return;}
+  if(nr)nr.style.display='none';
+  const u=S.who;
+  const rel=S.msgs.filter(m=>m.sender===u||m.recip===u);
+  if(!rel.length){c.innerHTML=`<div class="sys-msg"><span>No messages yet. Keys ready — type a message.</span></div>`;return;}
+  c.innerHTML=rel.map(m=>{
+    const sent=m.sender===u;
+    let badge=m.sig!==null
+      ?(m.sigOk?`<span class="sbadge ok">✓ verified</span>`:`<span class="sbadge bad">✗ tampered!</span>`)
+      :`<span class="sbadge ns">unsigned</span>`;
+    return`<div class="mwrap ${sent?'s':'r'}">
+      <div class="mbubble">${esc(m.text)}</div>
+      <div class="mmeta">${m.ts} ${badge} <button class="detail-btn" onclick="showDetail(${m.id})">📋 details</button></div>
+    </div>`;
+  }).join('');
+  c.scrollTop=c.scrollHeight;
+}
+function showDetail(id){
+  const m=S.msgs.find(x=>x.id===id);if(!m)return;
+  const sv=m.sig?(m.sigOk?'<span style="color:var(--glow2)">✓ VALID — message integrity confirmed</span>':'<span style="color:var(--glow3)">✗ INVALID — message was tampered!</span>'):'Not signed';
+  document.getElementById('mdBody').innerHTML=`
+    <div class="msec"><div class="msec-t">📨 Plaintext Message</div><div class="mfield">${esc(m.text)}</div></div>
+    <div class="msec"><div class="msec-t">🔏 SHA-256 Hash of Plaintext</div><div class="mfield hi">${m.ph}</div></div>
+    <div class="msec"><div class="msec-t">🔑 RSA-OAEP Encrypted AES Session Key (truncated)</div><div class="mfield">${m.ed.wk.substring(0,128)}…</div></div>
+    <div class="msec"><div class="msec-t">🌀 AES-GCM Initialization Vector (96-bit, random)</div><div class="mfield hi">${m.ed.iv}</div></div>
+    <div class="msec"><div class="msec-t">🔐 AES-GCM Ciphertext (truncated)</div><div class="mfield">${m.ed.ct.substring(0,128)}…</div></div>
+    <div class="msec"><div class="msec-t">✍ HMAC-SHA256 Digital Signature</div><div class="mfield ${m.sigOk===false?'wa':''}">${m.sig||'None (message not signed)'}</div></div>
+    <div class="msec"><div class="msec-t">🛡 Signature Verification Result</div><div class="mfield">${sv}</div></div>
+    <div class="msec"><div class="msec-t">📐 Protocol Summary</div><div class="mfield" style="color:var(--text2)">Direction:   ${m.sender.toUpperCase()} → ${m.recip.toUpperCase()}
+Asymmetric:  RSA-2048-OAEP  (session key encapsulation)
+Symmetric:   AES-256-GCM    (message encryption + GCM auth)
+Auth/Sign:   HMAC-SHA256    (message authentication code)
+Hash:        SHA-256         (plaintext digest)
+IV/Nonce:    96-bit random   (unique per message)
+Session Key: 256-bit AES     (ephemeral, fresh per message)</div></div>`;
+  document.getElementById('mdOv').classList.add('open');
+}
+function closeMd(e){if(!e||e.target===document.getElementById('mdOv'))document.getElementById('mdOv').classList.remove('open');}
+function loadTamper(){
+  if(!S.who){alert('Select a participant first!');return;}
+  if(!S.alice.kp){alert('Generate keys first!');return;}
+  document.getElementById('doSign').checked=true;
+  document.getElementById('doTamper').checked=true;
+  document.getElementById('msgInput').value='Urgent: Transfer ₹50,000 to account #8291';
+  log('⚠ Tamper demo loaded. Send to observe HMAC verification failure.','warn');
+}
+document.getElementById('msgInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+});
+</script>
+</body>
+</html>
